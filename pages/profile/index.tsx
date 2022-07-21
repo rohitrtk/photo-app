@@ -1,29 +1,17 @@
-import React from "react";
-import { GetServerSideProps } from "next";
-import { useSession } from "next-auth/react";
+import React, { useEffect } from "react";
+import { useRouter } from "next/router";
+import { useAuth } from "../../context/AuthContext";
 
 const Profile = () => {
-  return (
-    <div>Profile page</div>
-  );
+
+  const { user } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    router.push(user ? `/profile/${user.displayName}` : "/login");
+  }, []);
+
+  return <></>;
 }
 
 export default Profile;
-
-/* export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
-
-  /* const { data: session } = useSession();
-
-  if (!session) {
-    return {
-      redirect: {
-        destination: "/login",
-        permanent: false
-      }
-    }
-  }
-
-  return {
-    props: { session }
-  };
-  } */

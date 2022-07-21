@@ -1,4 +1,5 @@
-import React, { useRef } from "react";
+import React, { useRef, MouseEvent } from "react";
+import { useRouter } from "next/router";
 import {
   Flex,
   FormControl,
@@ -12,10 +13,29 @@ import {
 import Link from "next/Link";
 import { motion } from "framer-motion";
 
+import { useAuth } from "../../context/AuthContext";
+
 const Login = () => {
 
-  const usernameRef = useRef(null);
-  const passwordRef = useRef(null);
+  const emailRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
+
+  const { user, login } = useAuth();
+  const router = useRouter();
+
+  const handleLogin = async (event: MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+
+    const emailValue = emailRef.current?.value;
+    const passwordValue = passwordRef.current?.value;
+
+    try {
+      await login(emailValue, passwordValue);
+      router.push("/");
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
   return (
     <motion.div
@@ -33,10 +53,10 @@ const Login = () => {
         <Center h="75vh">
           <FormControl>
             <Stack spacing="5">
-              <Input ref={usernameRef} id="username" placeholder="Username" variant="flushed" size="md" />
+              <Input ref={emailRef} id="email" placeholder="Email Address" variant="flushed" size="md" />
               <Input ref={passwordRef} id="password" placeholder="Password" variant="flushed" size="md" type="password" />
               <Flex alignItems="center" justifyContent="center">
-                <Button>Sign In</Button>
+                <Button onClick={handleLogin}>Sign In</Button>
               </Flex>
               <Text fontSize="sm" color={useColorModeValue("gray.500", "gray.100")}>
                 <Link href="/register">

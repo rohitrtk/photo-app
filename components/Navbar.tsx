@@ -1,4 +1,5 @@
 import React, { ReactNode } from "react";
+import { useRouter } from "next/router";
 import {
   Box,
   Flex,
@@ -16,6 +17,10 @@ import {
 import { HamburgerIcon, CloseIcon, MoonIcon, SunIcon } from '@chakra-ui/icons';
 import NextLink from "next/Link";
 
+import { useAuth } from "../context/AuthContext";
+import { LoginIcon, LogoutIcon, AddIcon } from "./Icons";
+import { Router } from "next/router";
+
 interface LinkProps {
   name: string;
   href: string;
@@ -27,8 +32,8 @@ const links: Array<LinkProps> = [
     href: "/"
   },
   {
-    name: "Sign In",
-    href: "/login"
+    name: "About",
+    href: "/about"
   }
 ];
 
@@ -46,7 +51,7 @@ const NavbarLink: React.FC<NavbarLinkProps> = ({ children, href }) => {
       <Link
         px={2}
         py={1}
-        rounded={"md"}
+        rounded="md"
         _hover={{
           textDecoration: "none",
           bg: useColorModeValue("gray.200", "gray.700")
@@ -60,40 +65,83 @@ const NavbarLink: React.FC<NavbarLinkProps> = ({ children, href }) => {
 
 const Navbar = () => {
 
+  const { user, logout } = useAuth();
+  const router = useRouter();
+
   const { colorMode, toggleColorMode } = useColorMode();
   const { isOpen, onOpen, onClose } = useDisclosure();
+
+  const handleLogout = () => {
+    if (user) {
+      try {
+        logout();
+        router.push("/login");
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  }
 
   return (
     <>
       <Box bg={useColorModeValue("gray.100", "gray.900")} px={4}>
-        <Flex h={16} alignItems={"center"} justifyContent={"space-between"}>
+        <Flex h={16} alignItems="center" justifyContent="space-between">
           <IconButton
-            size={"md"}
+            size="md"
             icon={isOpen ? <CloseIcon /> : <HamburgerIcon />}
-            aria-label={"Open Menu"}
+            aria-label="Open Menu"
             display={{ md: "none" }}
             onClick={isOpen ? onClose : onOpen}
           />
-          <HStack spacing={8} alignItems={"center"}>
-            {/* Logo */}
+          <HStack spacing={8} alignItems="center">
             <Box>
               <Link href="/">
-                <Image src="/logo.png" boxSize="50px" />
+                <Image
+                  src="/logo.png"
+                  boxSize="50px"
+                  filter={`invert(${useColorModeValue("0%", "100%")})`} />
               </Link>
             </Box>
             <HStack
-              as={"nav"}
+              as="nav"
               spacing={4}
               display={{ base: "none", md: "flex" }}
             >
               {
                 links.map(({ name, href }) => <NavbarLink key={name} href={href}>{name}</NavbarLink>)
               }
+              {
+                user ? <NavbarLink key={"Profile"} href="/profile">Profile</NavbarLink> : null
+              }
             </HStack>
           </HStack>
-          <Button onClick={toggleColorMode}>
-            {colorMode === "light" ? <MoonIcon /> : <SunIcon />}
-          </Button>
+          <HStack
+            spacing={1}
+          >
+            <Button onClick={toggleColorMode}>
+              {colorMode === "light" ? <MoonIcon /> : <SunIcon />}
+            </Button>
+            {
+              user ?
+                <IconButton
+                  aria-label="upload"
+                  icon={<AddIcon />}
+                  onClick={() => {
+                    router.push("/upload");
+                  }}
+                />
+                :
+                null
+            }
+            <NextLink href={user ? "/" : "/login"}>
+              <IconButton
+                aria-label="login"
+                icon={user ? <LogoutIcon /> : <LoginIcon />}
+                onClick={handleLogout}
+              >
+              </IconButton>
+            </NextLink>
+          </HStack>
         </Flex>
 
         {isOpen ?
