@@ -4,7 +4,7 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
-  updateProfile
+  updateProfile,
 } from "firebase/auth";
 import { auth } from "../config/firebase";
 
@@ -29,7 +29,6 @@ export const AuthContextProvider = ({ children }: AuthContextProps) => {
           email: user.email,
           displayName: user.displayName
         });
-        console.log(user);
       } else {
         setUser(null);
       }
@@ -57,6 +56,10 @@ export const AuthContextProvider = ({ children }: AuthContextProps) => {
   const logout = async () => {
     setUser(null);
     await signOut(auth);
+  }
+
+  const fetchUser = () => {
+
   }
 
   return (

@@ -1,9 +1,12 @@
+import { GetServerSideProps } from 'next';
+import { AppProps } from "next/app";
 import { Box, Grid, GridItem } from '@chakra-ui/react';
 import { motion } from "framer-motion";
 
 import Post from "../components/Post";
 
-const Home = () => {
+const Home = (props: any) => {
+  console.log(props);
   return (
     <>
       <motion.div
@@ -43,3 +46,15 @@ const Home = () => {
 }
 
 export default Home;
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+
+  const res = await fetch("http://localhost:3000/api/hello");
+  const data = await res.json();
+
+  return {
+    props: {
+      data
+    }
+  }
+}

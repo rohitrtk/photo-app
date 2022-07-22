@@ -17,6 +17,7 @@ import {
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { v4 } from "uuid";
 
 import { useAuth } from "../../context/AuthContext";
 import { storage } from "../../config/firebase";
@@ -46,30 +47,36 @@ const Upload = () => {
   }
 
   const handlePostPhoto = async () => {
-    onOpen();
-
-    const userStorageRef = ref(storage, `${user.uid}/media/test.jpg`);
-
     if (!imageFile) {
       return;
     }
+
+    onOpen();
+
+    // Create a uuid and remove the dashes for the uploaded photos name
+    const fileName = v4().replaceAll("-", "");
+
+    // Set the storage reference
+    const userStorageRef = ref(storage, `${user.uid}/media/${fileName}.jpg`);
+
+    // Convert the image file to an array buffer and begin uploading
     const fileArrayBuffer = await imageFile.arrayBuffer();
     const uploadTask = uploadBytesResumable(userStorageRef, fileArrayBuffer);
 
     uploadTask.on("state_changed",
       (snapshot) => {
         setUploadProgress((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
-        console.log('Upload is ' + uploadProgress + '% done');
       },
       (error) => {
         onClose();
         console.error(error);
       },
       () => {
+        /*  
         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
           console.log('File available at', downloadURL);
         });
-
+        */
         onClose();
         setUploadProgress(0);
         setUploadSuccess(true);
@@ -103,7 +110,7 @@ const Upload = () => {
     >
       <Center h="80vh">
         {
-          !uploadSuccess ?
+          uploadSuccess ?
             <Text fontSize="4xl">Photo posted!</Text>
             :
             <>
@@ -117,7 +124,7 @@ const Upload = () => {
                         <HStack>
                           <Text fontSize="2xl">Posting...</Text>
                           <CircularProgress size="75px" value={uploadProgress}>
-                            <CircularProgressLabel>{uploadProgress}%</CircularProgressLabel>
+                            <CircularProgressLabel>{Math.trunc(uploadProgress)}%</CircularProgressLabel>
                           </CircularProgress>
                         </HStack>
                       </Box>
