@@ -5,16 +5,34 @@ import {
   Box,
   Image,
   Button,
-  VStack
+  VStack,
+  CircularProgress,
+  CircularProgressLabel,
+  Modal,
+  ModalOverlay,
+  ModalBody,
+  useDisclosure,
+  Text,
+  HStack
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+
+import { useAuth } from "../../context/AuthContext";
+import { storage } from "../../config/firebase";
 
 const Upload = () => {
 
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [uploadSuccess, setUploadSuccess] = useState<boolean>(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const { user } = useAuth();
+
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const handleUpload = () => inputRef.current?.click();
 
@@ -27,8 +45,36 @@ const Upload = () => {
     }
   }
 
-  const handlePostPhoto = () => {
-    console.log("Post");
+  const handlePostPhoto = async () => {
+    onOpen();
+
+    const userStorageRef = ref(storage, `${user.uid}/media/test.jpg`);
+
+    if (!imageFile) {
+      return;
+    }
+    const fileArrayBuffer = await imageFile.arrayBuffer();
+    const uploadTask = uploadBytesResumable(userStorageRef, fileArrayBuffer);
+
+    uploadTask.on("state_changed",
+      (snapshot) => {
+        setUploadProgress((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+        console.log('Upload is ' + uploadProgress + '% done');
+      },
+      (error) => {
+        onClose();
+        console.error(error);
+      },
+      () => {
+        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+          console.log('File available at', downloadURL);
+        });
+
+        onClose();
+        setUploadProgress(0);
+        setUploadSuccess(true);
+      }
+    )
   }
 
   useEffect(() => {
@@ -56,28 +102,53 @@ const Upload = () => {
       }}
     >
       <Center h="80vh">
-        <Box>
-          <VStack>
-            <Box width="50%">
-              {
-                previewUrl
-                  ?
-                  <Image src={previewUrl} />
-                  :
-                  null
-              }
-            </Box>
-            <Button onClick={handleUpload}>Upload Photo</Button>
-            <Input ref={inputRef} type="file" accept="image/*" hidden={true} onChange={handleFileInput} />
-            {
-              previewUrl
-                ?
-                <Button onClick={handlePostPhoto}>Post Photo</Button>
-                :
-                null
-            }
-          </VStack>
-        </Box>
+        {
+          !uploadSuccess ?
+            <Text fontSize="4xl">Photo posted!</Text>
+            :
+            <>
+              <Modal blockScrollOnMount={true} isOpen={isOpen} onClose={onClose}>
+                <ModalOverlay bgColor="rgba(220, 220, 220, 0.6)">
+                  <ModalBody>
+                    <Center h="80vh">
+                      <Box bgColor="rgb(237, 242, 247)" p={5} sx={{
+                        borderRadius: "10%"
+                      }}>
+                        <HStack>
+                          <Text fontSize="2xl">Posting...</Text>
+                          <CircularProgress size="75px" value={uploadProgress}>
+                            <CircularProgressLabel>{uploadProgress}%</CircularProgressLabel>
+                          </CircularProgress>
+                        </HStack>
+                      </Box>
+                    </Center>
+                  </ModalBody>
+                </ModalOverlay>
+              </Modal>
+              <Box>
+                <VStack>
+                  <Box width="50%">
+                    {
+                      previewUrl
+                        ?
+                        <Image src={previewUrl} />
+                        :
+                        null
+                    }
+                  </Box>
+                  <Button onClick={handleUpload}>Upload Photo</Button>
+                  <Input ref={inputRef} type="file" accept="image/*" hidden={true} onChange={handleFileInput} />
+                  {
+                    previewUrl
+                      ?
+                      <Button onClick={handlePostPhoto}>Post Photo</Button>
+                      :
+                      null
+                  }
+                </VStack>
+              </Box>
+            </>
+        }
       </Center>
     </motion.div>
   );
