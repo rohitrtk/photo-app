@@ -1,38 +1,56 @@
+import { User } from "firebase/auth";
 import { NextApiRequest, NextApiResponse } from "next";
 import { bucket } from "../../lib/firebaseAdmin";
 import { auth } from "../../lib/firebaseAdmin";
 
-/* const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+const getDisplayNameFromUid = async (uid: string): Promise<string | undefined> => {
+  const { users } = await auth.listUsers();
 
-  return new Promise((resolve, reject) => {
-    try {
-
-      res.status(200).json({ hello: "world" });
-    } catch (error) {
-      res.status(405).json(error);
-      res.end();
-      resolve(null);
+  let displayName: string | undefined = undefined;
+  for (const userRecord of users) {
+    const currentUserDisplayName = (userRecord.toJSON() as User).displayName;
+    console.log(currentUserDisplayName);
+    if (uid === currentUserDisplayName) {
+      displayName = currentUserDisplayName;
+      break;
     }
+  }
+
+  return new Promise<string | undefined>((resolve, reject) => {
+    !displayName ? reject() : resolve(displayName);
   });
-} */
+}
+
+const getUidFromDisplayName = async (displayName: string): Promise<string | undefined> => {
+  const { users } = await auth.listUsers();
+
+  let uid: string | undefined = undefined;
+  for (const userRecord of users) {
+    const currentUser = (userRecord.toJSON() as User);
+    const currentUserDisplayName = currentUser.displayName;
+
+    if (currentUserDisplayName === displayName) {
+      uid = currentUser.uid;
+      break;
+    }
+  }
+
+  return new Promise<string | undefined>((resolve, reject) => {
+    uid === undefined ? reject() : resolve(uid);
+  });
+}
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
   const uid = "SnF7EBkkMsQrPkjEc5616Fm6WRM2";
-  const _res = await auth.getUsers([
-    { uid: uid }
-  ])
-  console.log(_res.users);
+  try {
+    const _uid = await getUidFromDisplayName("HELLO WORLD2");
+    console.log(_uid);
+  } catch (error) {
+    console.error(error);
+  }
 
-  res.status(200).json({ hello: "world" });
-  /* return new Promise((resolve, reject) => {
-    try {
-    } catch (error) {
-      res.status(405).json(error);
-      res.end();
-      resolve(null);
-    }
-  }); */
+  res.status(200).json({});
 }
 
 

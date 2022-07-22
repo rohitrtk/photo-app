@@ -58,10 +58,6 @@ export const AuthContextProvider = ({ children }: AuthContextProps) => {
     await signOut(auth);
   }
 
-  const fetchUser = () => {
-
-  }
-
   return (
     <AuthContext.Provider value={{ user, register, login, logout }}>
       {
