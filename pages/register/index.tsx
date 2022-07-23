@@ -11,6 +11,7 @@ import {
 } from "@chakra-ui/react";
 import Link from "next/Link";
 import { motion } from "framer-motion";
+import axios from "axios";
 
 import { useAuth } from "../../context/AuthContext";
 
@@ -30,10 +31,28 @@ const Register = () => {
     const passwordValue = passwordRef.current?.value;
 
     try {
+      const res = await axios.post("http://localhost:3000/api/register", {
+        email: emailValue,
+        displayName: displayNameValue,
+        password: passwordValue
+      });
+
+      const { data } = res;
+      if ("error" in data) {
+        console.log(data.error);
+      } else {
+        console.log("Success");
+      }
+
+    } catch (e) {
+      console.error(e);
+    }
+
+    /* try {
       await register(emailValue, displayNameValue, passwordValue);
     } catch (error) {
       console.error(error);
-    }
+    } */
   }
 
   return (

@@ -9,7 +9,7 @@ const getDisplayNameFromUid = async (uid: string): Promise<string | undefined> =
   let displayName: string | undefined = undefined;
   for (const userRecord of users) {
     const currentUserDisplayName = (userRecord.toJSON() as User).displayName;
-    console.log(currentUserDisplayName);
+
     if (uid === currentUserDisplayName) {
       displayName = currentUserDisplayName;
       break;
@@ -22,6 +22,7 @@ const getDisplayNameFromUid = async (uid: string): Promise<string | undefined> =
 }
 
 const getUidFromDisplayName = async (displayName: string): Promise<string | undefined> => {
+  const decodedDisplayName = decodeURI(displayName);
   const { users } = await auth.listUsers();
 
   let uid: string | undefined = undefined;
@@ -29,7 +30,7 @@ const getUidFromDisplayName = async (displayName: string): Promise<string | unde
     const currentUser = (userRecord.toJSON() as User);
     const currentUserDisplayName = currentUser.displayName;
 
-    if (currentUserDisplayName === displayName) {
+    if (currentUserDisplayName === decodedDisplayName) {
       uid = currentUser.uid;
       break;
     }
@@ -42,7 +43,9 @@ const getUidFromDisplayName = async (displayName: string): Promise<string | unde
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
-  const uid = "SnF7EBkkMsQrPkjEc5616Fm6WRM2";
+  console.log(req.body);
+
+  //const uid = "SnF7EBkkMsQrPkjEc5616Fm6WRM2";
   try {
     const _uid = await getUidFromDisplayName("HELLO WORLD2");
     console.log(_uid);
@@ -50,7 +53,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     console.error(error);
   }
 
-  res.status(200).json({});
+  res.status(200).json({
+    data: req.body
+  });
 }
 
 
