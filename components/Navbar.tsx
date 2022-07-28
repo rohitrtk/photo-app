@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react";
+import React, { ReactNode, useContext } from "react";
 import { useRouter } from "next/router";
 import {
   Box,
@@ -20,6 +20,9 @@ import NextLink from "next/Link";
 import { useAuth } from "../context/AuthContext";
 import { LoginIcon, LogoutIcon, AddIcon } from "./Icons";
 import { Router } from "next/router";
+import { signOut } from "firebase/auth";
+import { auth } from "../lib/firebase";
+import { UserContext } from "../lib/context";
 
 interface LinkProps {
   name: string;
@@ -65,20 +68,18 @@ const NavbarLink: React.FC<NavbarLinkProps> = ({ children, href }) => {
 
 const Navbar = () => {
 
-  const { user, logout } = useAuth();
+  const { user, username } = useContext(UserContext);
   const router = useRouter();
 
   const { colorMode, toggleColorMode } = useColorMode();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const handleLogout = () => {
-    if (user) {
-      try {
-        logout();
-        router.push("/login");
-      } catch (error) {
-        console.error(error);
-      }
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      router.push("/login");
+    } catch (error) {
+      console.error(error);
     }
   }
 

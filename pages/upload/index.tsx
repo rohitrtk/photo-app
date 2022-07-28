@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef, ChangeEvent } from "react";
+import React, { useState, useEffect, useRef, useContext, ChangeEvent } from "react";
+import { useRouter } from "next/router";
 import {
   Center,
   Input,
@@ -16,11 +17,22 @@ import {
   HStack
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import {
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
+  UploadTaskSnapshot,
+  StorageError
+} from "firebase/storage";
+import {
+  doc,
+  setDoc,
+  serverTimestamp
+} from "firebase/firestore";
 import { v4 } from "uuid";
 
-import { useAuth } from "../../context/AuthContext";
-import { storage } from "../../config/firebase";
+import { storage, fs } from "../../lib/firebase";
+import { UserContext } from "../../lib/context";
 
 const Upload = () => {
 
@@ -31,9 +43,17 @@ const Upload = () => {
 
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const { user } = useAuth();
+  const { user, username } = useContext(UserContext);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
+
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!user || !username) {
+      router.push("/login");
+    }
+  }, []);
 
   const handleUpload = () => inputRef.current?.click();
 
@@ -57,31 +77,36 @@ const Upload = () => {
     const fileName = v4().replaceAll("-", "");
 
     // Set the storage reference
-    const userStorageRef = ref(storage, `${user.uid}/media/${fileName}.jpg`);
+    const userStorageRef = ref(storage, `${(user as any).uid}/media/${fileName}.jpg`);
 
     // Convert the image file to an array buffer and begin uploading
     const fileArrayBuffer = await imageFile.arrayBuffer();
     const uploadTask = uploadBytesResumable(userStorageRef, fileArrayBuffer);
 
     uploadTask.on("state_changed",
-      (snapshot) => {
-        setUploadProgress((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+      // On snapshot progress changed
+      (snapshot: UploadTaskSnapshot) => {
+        setUploadProgress((snapshot.bytesTransferred / snapshot.totalBytes) * 100)
       },
-      (error) => {
+      // On error
+      (error: StorageError) => {
         onClose();
         console.error(error);
       },
-      () => {
-        /*  
-        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-          console.log('File available at', downloadURL);
-        });
-        */
+      // On success
+      async () => {
         onClose();
         setUploadProgress(0);
         setUploadSuccess(true);
-      }
-    )
+
+        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+        const userCollection = doc(fs, `usernames/${username}/uploads/${fileName}`);
+        await setDoc(userCollection, {
+          downloadURL,
+          username,
+          timestamp: serverTimestamp()
+        });
+      });
   }
 
   useEffect(() => {

@@ -1,0 +1,22 @@
+[
+  {
+    "href": "https://nextjs.org/",
+    "title": "Next.js",
+    "desc": "because it's an amazing framework"
+  },
+  {
+    "href": "https://chakra-ui.com/",
+    "title": "Chakra",
+    "desc": "for the UI"
+  },
+  {
+    "href": "https://www.framer.com/motion/",
+    "title": "Framer Motion",
+    "desc": "for the page animations"
+  },
+  {
+    "href": "https://firebase.google.com/",
+    "title": "Google Firebase",
+    "desc": "for it's authentication, database, & storage"
+  }
+]

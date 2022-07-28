@@ -1,64 +1,56 @@
-import { GetServerSideProps } from 'next';
-import { AppProps } from "next/app";
-import { Box, Grid, GridItem } from '@chakra-ui/react';
+import { useContext } from "react";
+import { Box } from '@chakra-ui/react';
 import { motion } from "framer-motion";
-import axios from "axios";
+import {
+  collectionGroup,
+  query,
+  orderBy,
+  limit,
+  getDocs,
+  DocumentData
+} from "firebase/firestore";
 
-import Post from "../components/Post";
+import GridLayout from "../components/GridLayout";
+import { UserContext } from "../lib/context";
+import { fs, docToJSON } from "../lib/firebase";
 
-const Home = (props: any) => {
-  console.log(props);
+interface IHomeProps {
+  uploads: DocumentData[];
+}
+
+const Home = ({ uploads }: IHomeProps) => {
+  const { user } = useContext(UserContext);
+
   return (
-    <>
-      <motion.div
-        initial={{
-          opacity: 0
-        }}
-        animate={{
-          opacity: 1,
-          transition: {
-            duration: 1
-          }
-        }}
-        exit={{
-          opacity: 0
-        }}
-      >
-        <Box h="85vh">
-          <Grid
-            templateColumns="repeat(4, 1fr)"
-            gap={2}
-            h="100%"
-            m={2}
-          >
-            <GridItem colSpan={1}>
-            </GridItem>
-            <GridItem colSpan={1}>
-            </GridItem>
-            <GridItem colSpan={1}>
-            </GridItem>
-            <GridItem colSpan={1}>
-            </GridItem>
-          </Grid>
-        </Box>
-      </motion.div>
-    </>
+    <motion.div
+      initial={{
+        opacity: 0
+      }}
+      animate={{
+        opacity: 1,
+        transition: {
+          duration: 1
+        }
+      }}
+      exit={{
+        opacity: 0
+      }}
+    >
+      <GridLayout mediaItems={uploads as []} />
+    </motion.div>
   );
 }
 
 export default Home;
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
-
-  const res = await axios.post("http://localhost:3000/api/hello", {
-    firstName: "Rohit",
-    lastName: "Kisto"
-  });
-  const data = res.data;
+export const getServerSideProps = async () => {
+  const uploadCollection = collectionGroup(fs, "uploads");
+  const uploadQuery = query(uploadCollection, orderBy("timestamp", "desc"), limit(4));
+  const uploads = (await getDocs(uploadQuery)).docs.map(docToJSON);
 
   return {
     props: {
-      data
+      uploads
     }
   }
 }

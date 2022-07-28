@@ -1,17 +1,27 @@
-import React, { useEffect } from "react";
+import { useContext, useEffect } from "react";
 import { useRouter } from "next/router";
-import { useAuth } from "../../context/AuthContext";
 
-const Profile = () => {
+import { UserContext } from "../../lib/context";
 
-  const { user } = useAuth();
+/**
+ * If the user is logged in and attempts to go to /profile, redirect them to their
+ * own profile. Otherwise, if the non logged in user attempts to go to /profile, redirect them to /login.
+ */
+const ProfileRedirect = () => {
+  const user = useContext(UserContext);
   const router = useRouter();
 
   useEffect(() => {
-    router.push(user ? `/profile/${user.displayName}` : "/login");
+    if (user && user.username) {
+      router.push(`/profile/${user.username}`);
+    } else {
+      router.push("/login");
+    }
   }, []);
 
-  return <></>;
+  return (
+    <></>
+  );
 }
 
-export default Profile;
+export default ProfileRedirect;

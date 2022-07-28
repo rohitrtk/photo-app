@@ -1,25 +1,16 @@
 import React from "react";
-import { Center, Text, VStack, Heading, Divider, Link } from '@chakra-ui/react';
+import {
+  Center,
+  Text,
+  VStack,
+  Heading,
+  Divider,
+  Link,
+  useColorModeValue
+} from '@chakra-ui/react';
 import { motion } from "framer-motion";
 
-const links = [
-  {
-    href: "https://nextjs.org/",
-    desc: "Next.js"
-  },
-  {
-    href: "https://chakra-ui.com/",
-    desc: "Chakra for UI"
-  },
-  {
-    href: "https://www.framer.com/motion/",
-    desc: "Framer Motion for animations"
-  },
-  {
-    href: "https://firebase.google.com/",
-    desc: "Firebase for authentication & storage"
-  },
-];
+import links from "../../public/json/aboutLinks.json";
 
 const About = () => {
   return (
@@ -34,18 +25,21 @@ const About = () => {
         opacity: 0
       }}
     >
-      <Center h="400px">
-        <VStack spacing={6}>
-          <Heading as="h2" size="xl">
+      <Center pt={10}>
+        <VStack>
+          <Heading as="h2" size="2xl">
             This site was built using
           </Heading>
           <Divider />
           {
-            links.map(({ href, desc }) => {
+            links.map(({ href, title, desc }) => {
               return (
-                <Link href={href} key={href}>
-                  <Text fontSize="2xl">{desc}</Text>
-                </Link>
+                <VStack spacing={1} key={title}>
+                  <Link href={href}>
+                    <Heading as="h6" size="lg">{title}</Heading>
+                  </Link>
+                  <Text fontSize="2xs" color={useColorModeValue("gray.500", "gray.100")}>{desc}</Text>
+                </VStack>
               );
             })
           }

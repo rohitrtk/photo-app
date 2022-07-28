@@ -2,6 +2,8 @@ import { AppProps } from "next/app";
 import { ChakraProvider, extendTheme } from "@chakra-ui/react";
 import { AnimatePresence } from "framer-motion";
 
+import { useUserData } from "../hooks";
+import { UserContext } from "../lib/context";
 import { AuthContextProvider } from "../context/AuthContext";
 import Layout from "../components/Layout";
 
@@ -14,16 +16,19 @@ const theme = extendTheme({
   }
 });
 
-const App: React.FC<AppProps> = ({ Component, pageProps, router }) => {
+const App = ({ Component, pageProps, router }: AppProps) => {
+
+  const { user, username } = useUserData();
+
   return (
     <ChakraProvider theme={theme}>
-      <AuthContextProvider>
+      <UserContext.Provider value={{ user, username }}>
         <Layout>
           <AnimatePresence exitBeforeEnter>
             <Component {...pageProps} key={router.pathname} />
           </AnimatePresence>
         </Layout>
-      </AuthContextProvider>
+      </UserContext.Provider>
     </ChakraProvider>
   );
 }

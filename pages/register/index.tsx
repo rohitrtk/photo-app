@@ -1,4 +1,4 @@
-import React, { useState, useRef, MouseEvent } from "react";
+import React, { useState, useRef, useContext, MouseEvent } from "react";
 import {
   Flex,
   FormControl,
@@ -11,10 +11,12 @@ import {
   useColorModeValue
 } from "@chakra-ui/react";
 import Link from "next/Link";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { writeBatch, doc, getDoc } from "firebase/firestore";
 import { motion } from "framer-motion";
-import axios from "axios";
 
-import { useAuth } from "../../context/AuthContext";
+import { auth, fs } from "../../lib/firebase";
+import { UserContext } from "../../lib/context";
 
 const Register = () => {
 
@@ -24,8 +26,6 @@ const Register = () => {
   const displayNameRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
 
-  const { user, register } = useAuth();
-
   const handleRegister = async (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
 
@@ -33,23 +33,40 @@ const Register = () => {
     const displayNameValue = displayNameRef.current?.value;
     const passwordValue = passwordRef.current?.value;
 
+    if (!emailValue) {
+      return;
+    }
+
+    if (!displayNameValue) {
+      return;
+    }
+
+    if (!passwordValue) {
+      return;
+    }
+
     try {
-      const res = await axios.post("http://localhost:3000/api/register", {
-        email: emailValue,
-        displayName: displayNameValue,
-        password: passwordValue
+      const { user } = await createUserWithEmailAndPassword(auth, emailValue, passwordValue);
+
+      const userDoc = doc(fs, `users/${user.uid}`);
+      const usernameDoc = doc(fs, `usernames/${displayNameValue}`);
+
+      const batch = writeBatch(fs);
+      batch.set(userDoc, {
+        username: displayNameValue,
+        photoURL: user.photoURL,
+        displayName: user.displayName
+      });
+      batch.set(usernameDoc, {
+        uid: user.uid
       });
 
-      const { data } = res;
-      if ("error" in data) {
-        console.log(data.error);
-      } else {
-        setRegistrationSuccess(true);
-      }
-
+      await batch.commit();
     } catch (e) {
       console.error(e);
     }
+
+    setRegistrationSuccess(true);
   }
 
   return (
@@ -80,21 +97,23 @@ const Register = () => {
                 </Center>
               </Stack>
               :
-              <FormControl>
-                <Stack spacing="5">
-                  <Input ref={emailRef} id="email" placeholder="Email Address" variant="flushed" size="md" />
-                  <Input ref={displayNameRef} id="displayName" placeholder="Display Name" variant="flushed" size="md" />
-                  <Input ref={passwordRef} id="password" placeholder="Password" variant="flushed" size="md" type="password" />
-                  <Flex alignItems="center" justifyContent="center">
-                    <Button onClick={handleRegister}>Register</Button>
-                  </Flex>
-                  <Text fontSize="sm" color={useColorModeValue("gray.500", "gray.100")}>
-                    <Link href="/login">
-                      Already have an account? Sign in here.
-                    </Link>
-                  </Text>
-                </Stack>
-              </FormControl>
+              <form>
+                <FormControl>
+                  <Stack spacing="5">
+                    <Input ref={emailRef} id="email" placeholder="Email Address" variant="flushed" size="md" />
+                    <Input ref={displayNameRef} id="displayName" placeholder="Display Name" variant="flushed" size="md" />
+                    <Input ref={passwordRef} id="password" placeholder="Password" variant="flushed" size="md" type="password" />
+                    <Flex alignItems="center" justifyContent="center">
+                      <Button type="submit" onClick={handleRegister}>Register</Button>
+                    </Flex>
+                    <Text fontSize="sm" color={useColorModeValue("gray.500", "gray.100")}>
+                      <Link href="/login">
+                        Already have an account? Sign in here.
+                      </Link>
+                    </Text>
+                  </Stack>
+                </FormControl>
+              </form>
           }
         </Center>
       </Flex>

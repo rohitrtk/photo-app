@@ -10,8 +10,11 @@ import Post from "./Post";
 const numCols = 4;
 
 export interface MediaItem {
-  url: string;
+  downloadURL: string;
   username: string;
+  timestamp?: string;
+  id: string;
+  likes: number;
 }
 
 interface Props {
@@ -43,13 +46,25 @@ const GridLayout = ({ mediaItems, showUsernames = true }: Props) => {
             return (
               <GridItem key={`col${remainder}`} colSpan={1}>
                 {
-                  mediaItems
-                    .filter((media, i, array) => i % numCols === remainder)
-                    .map((mediaitem) => {
-                      return (
-                        <Post key={mediaitem.url} src={mediaitem.url} username={mediaitem.username} showUsername={showUsernames} />
-                      );
-                    })
+                  mediaItems ?
+                    mediaItems
+                      .filter((media, i, array) => i % numCols === remainder)
+                      .map((mediaItem) => {
+                        const { id, downloadURL, timestamp, username, likes } = mediaItem;
+
+                        return (
+                          <Post
+                            key={id}
+                            id={id}
+                            src={downloadURL}
+                            timestamp={timestamp}
+                            likes={likes}
+                            username={username}
+                            showUsername={showUsernames}
+                          />
+                        );
+                      })
+                    : <></>
                 }
               </GridItem>
             );

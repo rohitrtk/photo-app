@@ -1,6 +1,6 @@
 import { initializeApp, getApps, getApp, cert, App, ServiceAccount } from "firebase-admin/app";
 import { getStorage } from "firebase-admin/storage";
-import { getAuth } from "firebase-admin/auth";
+import { getAuth, Auth } from "firebase-admin/auth";
 
 require("dotenv").config();
 
@@ -20,4 +20,4 @@ const initializeFirebaseApp = (): App => {
 const app = !getApps().length ? initializeFirebaseApp() : getApp("Admin");
 
 export const bucket = getStorage(app).bucket();
-export const auth = getAuth(app);
+export const auth: Auth = getAuth(app);
