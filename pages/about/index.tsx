@@ -8,23 +8,14 @@ import {
   Link,
   useColorModeValue
 } from '@chakra-ui/react';
-import { motion } from "framer-motion";
+
+import Fade from "../../components/Fade";
 
 import links from "../../public/json/aboutLinks.json";
 
 const About = () => {
   return (
-    <motion.div
-      initial={{
-        opacity: 0
-      }}
-      animate={{
-        opacity: 1
-      }}
-      exit={{
-        opacity: 0
-      }}
-    >
+    <Fade>
       <Center pt={10}>
         <VStack>
           <Heading as="h2" size="2xl">
@@ -45,7 +36,7 @@ const About = () => {
           }
         </VStack>
       </Center>
-    </motion.div>
+    </Fade>
   );
 }
 

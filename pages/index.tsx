@@ -1,6 +1,8 @@
 import { useContext } from "react";
-import { Box } from '@chakra-ui/react';
-import { motion } from "framer-motion";
+import {
+  Box,
+  Text
+} from '@chakra-ui/react';
 import {
   collectionGroup,
   query,
@@ -9,35 +11,26 @@ import {
   getDocs,
   DocumentData
 } from "firebase/firestore";
+import { useAuthState } from "react-firebase-hooks/auth";
 
-import GridLayout from "../components/GridLayout";
 import { UserContext } from "../lib/context";
-import { fs, docToJSON } from "../lib/firebase";
+import { fs, auth, docToJSON } from "../lib/firebase";
+import GridLayout from "../components/GridLayout";
+import Fade from "../components/Fade";
 
 interface IHomeProps {
   uploads: DocumentData[];
 }
 
 const Home = ({ uploads }: IHomeProps) => {
+
   const { user } = useContext(UserContext);
+  //const [user] = useAuthState(auth);
 
   return (
-    <motion.div
-      initial={{
-        opacity: 0
-      }}
-      animate={{
-        opacity: 1,
-        transition: {
-          duration: 1
-        }
-      }}
-      exit={{
-        opacity: 0
-      }}
-    >
+    <Fade>
       <GridLayout mediaItems={uploads as []} />
-    </motion.div>
+    </Fade>
   );
 }
 

@@ -15,6 +15,7 @@ import {
 
 import { fs, docToJSON } from "../../../../lib/firebase";
 import Post from "../../../../components/Post";
+import Fade from "../../../../components/Fade";
 
 interface IMediaProps {
   data: DocumentData;
@@ -25,7 +26,7 @@ const Media = ({ data }: IMediaProps) => {
   const { downloadURL, timestamp, username, id, likes } = data;
 
   return (
-    <>
+    <Fade>
       <Center>
         <Box w="25%" h="25%">
           <Post
@@ -39,13 +40,14 @@ const Media = ({ data }: IMediaProps) => {
           />
         </Box>
       </Center>
-    </>
+    </Fade>
   );
 }
 
 export default Media;
 
 export const getStaticPaths = async () => {
+  console.log("getting static paths");
   const uploadDocs = await getDocs(collectionGroup(fs, "uploads"));
 
   const paths = uploadDocs.docs.map((doc: DocumentData) => {
@@ -67,6 +69,7 @@ export const getStaticPaths = async () => {
 }
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
+  console.log("getting static props");
   const { username, id } = params as any;
 
   const d = doc(fs, `usernames/${username}/uploads/${id}`);

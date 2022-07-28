@@ -16,7 +16,6 @@ import {
   Text,
   HStack
 } from "@chakra-ui/react";
-import { motion } from "framer-motion";
 import {
   ref,
   uploadBytesResumable,
@@ -33,6 +32,7 @@ import { v4 } from "uuid";
 
 import { storage, fs } from "../../lib/firebase";
 import { UserContext } from "../../lib/context";
+import Fade from "../../components/Fade";
 
 const Upload = () => {
 
@@ -122,17 +122,7 @@ const Upload = () => {
   }, [imageFile]);
 
   return (
-    <motion.div
-      initial={{
-        opacity: 0
-      }}
-      animate={{
-        opacity: 1
-      }}
-      exit={{
-        opacity: 0
-      }}
-    >
+    <Fade>
       <Center h="80vh">
         {
           uploadSuccess ?
@@ -182,7 +172,7 @@ const Upload = () => {
             </>
         }
       </Center>
-    </motion.div>
+    </Fade>
   );
 }
 

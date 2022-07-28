@@ -74,7 +74,7 @@ const Post = ({ src, id, username, likes, timestamp,
                       <Text fontSize="sm">@{username}</Text>
                     </Link>
                   </NavLink>
-                  <LikeComponent path={`usernames/${username}/uploads/${id}`} />
+
                 </HStack>
                 <Spacer />
                 {
@@ -98,5 +98,5 @@ const Post = ({ src, id, username, likes, timestamp,
     </Box>
   );
 }
-
+//<LikeComponent path={`usernames/${username}/uploads/${id}`} />}
 export default Post;

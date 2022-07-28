@@ -9,11 +9,11 @@ import {
   VStack,
   Text
 } from "@chakra-ui/react";
-import { motion } from "framer-motion";
 
 import { getUserWithUsername, docToJSON, fs } from "../../../lib/firebase";
 import { UserContext } from "../../../lib/context";
 import GridLayout, { MediaItem } from "../../../components/GridLayout";
+import Fade from "../../../components/Fade";
 
 interface IProps {
   user: any;
@@ -23,17 +23,7 @@ interface IProps {
 const Profile = ({ user, uploads }: IProps) => {
 
   return (
-    <motion.div
-      initial={{
-        opacity: 0
-      }}
-      animate={{
-        opacity: 1
-      }}
-      exit={{
-        opacity: 0
-      }}
-    >
+    <Fade>
       <Center h="150px" margin={1}>
         <VStack>
           <Avatar size="xl" bg="teal.500" />
@@ -43,7 +33,7 @@ const Profile = ({ user, uploads }: IProps) => {
       <Box h="85vh">
         <GridLayout mediaItems={uploads} />
       </Box>
-    </motion.div>
+    </Fade>
   );
 }
 

@@ -13,10 +13,10 @@ import {
 import Link from "next/Link";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { writeBatch, doc, getDoc } from "firebase/firestore";
-import { motion } from "framer-motion";
 
 import { auth, fs } from "../../lib/firebase";
 import { UserContext } from "../../lib/context";
+import Fade from "../../components/Fade";
 
 const Register = () => {
 
@@ -70,18 +70,7 @@ const Register = () => {
   }
 
   return (
-    <motion.div
-      initial={{
-        opacity: 0
-      }}
-      animate={{
-        opacity: 1
-      }}
-      exit={{
-        opacity: 0
-      }}
-    >
-
+    <Fade>
       <Flex alignItems="center" justifyContent="center">
         <Center h="75vh">
           {
@@ -117,7 +106,7 @@ const Register = () => {
           }
         </Center>
       </Flex>
-    </motion.div>
+    </Fade>
   );
 }
 
